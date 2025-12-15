@@ -3,7 +3,8 @@ import type { User } from "../../libs/db/users/users";
 
 
 export default (group: any) => {
-    group.get("/query", async ({url}: {url: string}) => {
+    group.get("/query", async ({ url }: { url: string }) => {
+        throw new Error("查询参数错误");
         const searchParams = new URL(url).searchParams;
         try {
             const result = await queryUsers({
