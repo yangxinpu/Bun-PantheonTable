@@ -23,5 +23,5 @@ app.listen({
     hostname: hostname,
     port: port,
 },()=>{
-    console.log(`🚀🚀🚀 PantheonTable 服务器运行在 ${app.server?.hostname}:${app.server?.port}`);
+    console.log(`🚀🚀🚀 PantheonTable 服务器运行在 http://${hostname}:${port}`);
 });

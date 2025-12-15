@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户接口测试 - PantheonTable</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.secondary {
+            background-color: #6c757d;
+        }
+
+        button.secondary:hover {
+            background-color: #545b62;
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            text-align: left;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>PantheonTable 用户接口测试</h1>
+
+        <!-- 用户查询接口测试 -->
+        <div class="section">
+            <h2>1. 用户查询接口 (/users/query)</h2>
+            <form id="queryForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="queryId">用户ID</label>
+                        <input type="number" id="queryId" name="id" placeholder="可选">
+                    </div>
+                    <div class="form-group">
+                        <label for="queryUsername">用户名</label>
+                        <input type="text" id="queryUsername" name="username" placeholder="可选">
+                    </div>
+                    <div class="form-group">
+                        <label for="queryEmail">邮箱</label>
+                        <input type="email" id="queryEmail" name="email" placeholder="可选">
+                    </div>
+                </div>
+                <button type="submit">查询用户</button>
+                <button type="reset" class="secondary">重置</button>
+            </form>
+            <div id="queryMessage" class="message"></div>
+            <div id="queryResult" class="result" style="display: none;">
+                <h3>查询结果：</h3>
+                <pre id="queryResultContent"></pre>
+            </div>
+        </div>
+
+        <!-- 用户创建接口测试 -->
+        <div class="section">
+            <h2>2. 用户创建接口 (/users/create)</h2>
+            <form id="createForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="createUsername">用户名</label>
+                        <input type="text" id="createUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createEmail">邮箱</label>
+                        <input type="email" id="createEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createWinRate">胜率</label>
+                        <input type="number" id="createWinRate" name="winRate" step="0.01" min="0" max="100" value="0"
+                            required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="createAvatar">头像URL</label>
+                        <input type="text" id="createAvatar" name="avatar" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="createTotalGames">总游戏数</label>
+                        <input type="number" id="createTotalGames" name="total_games" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="createStatus">状态</label>
+                        <input type="number" id="createStatus" name="status" min="0" max="1" value="0">
+                    </div>
+                </div>
+                <button type="submit">创建用户</button>
+                <button type="reset" class="secondary">重置</button>
+            </form>
+            <div id="createMessage" class="message"></div>
+            <div id="createResult" class="result" style="display: none;">
+                <h3>创建结果：</h3>
+                <pre id="createResultContent"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 宏定义 - 服务器配置
+        const SERVER_HOSTNAME = '192.168.115.88'; // 默认使用 localhost，可根据需要修改
+        const SERVER_PORT = 3000;
+        const API_BASE_URL = `http://${SERVER_HOSTNAME}:${SERVER_PORT}`;
+
+        // 用户查询表单处理
+        document.getElementById('queryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 获取表单数据
+            const id = document.getElementById('queryId').value;
+            const username = document.getElementById('queryUsername').value;
+            const email = document.getElementById('queryEmail').value;
+            const messageDiv = document.getElementById('queryMessage');
+            const resultDiv = document.getElementById('queryResult');
+            const resultContentDiv = document.getElementById('queryResultContent');
+
+            try {
+                // 显示加载状态
+                messageDiv.textContent = '正在查询...';
+                messageDiv.className = 'message';
+                resultDiv.style.display = 'none';
+
+                // 构建查询参数
+                const params = new URLSearchParams();
+                if (id) params.append('id', id);
+                if (username) params.append('username', username);
+                if (email) params.append('email', email);
+
+                // 调用用户查询接口
+                const response = await fetch(`${API_BASE_URL}/users/query?${params}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误! 状态: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // 显示查询结果
+                if (data.ok) {
+                    messageDiv.textContent = '查询成功！';
+                    messageDiv.className = 'message success';
+
+                    resultContentDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.style.display = 'block';
+                } else {
+                    messageDiv.textContent = `查询失败: ${data.message}`;
+                    messageDiv.className = 'message error';
+                }
+            } catch (error) {
+                messageDiv.textContent = `查询出错: ${error.message}`;
+                messageDiv.className = 'message error';
+                console.error('查询错误:', error);
+            }
+        });
+
+        // 用户创建表单处理
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 获取表单数据
+            const username = document.getElementById('createUsername').value;
+            const email = document.getElementById('createEmail').value;
+            const winRate = parseFloat(document.getElementById('createWinRate').value);
+            const avatar = document.getElementById('createAvatar').value;
+            const totalGames = parseInt(document.getElementById('createTotalGames').value);
+            const status = parseInt(document.getElementById('createStatus').value);
+            const messageDiv = document.getElementById('createMessage');
+            const resultDiv = document.getElementById('createResult');
+            const resultContentDiv = document.getElementById('createResultContent');
+
+            try {
+                // 显示加载状态
+                messageDiv.textContent = '正在创建...';
+                messageDiv.className = 'message';
+                resultDiv.style.display = 'none';
+
+                // 构建请求体
+                const userData = {
+                    username,
+                    email,
+                    winRate,
+                    avatar,
+                    total_games: totalGames,
+                    status,
+                    last_login_time: new Date().toISOString(),
+                    last_login_ip: '127.0.0.1' // 模拟IP
+                };
+
+                // 调用用户创建接口
+                const response = await fetch(`${API_BASE_URL}/users/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误! 状态: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // 显示创建结果
+                if (data.ok) {
+                    messageDiv.textContent = '创建成功！';
+                    messageDiv.className = 'message success';
+
+                    resultContentDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.style.display = 'block';
+
+                    // 清空表单
+                    document.getElementById('createForm').reset();
+                } else {
+                    messageDiv.textContent = `创建失败: ${data.message}`;
+                    messageDiv.className = 'message error';
+                }
+            } catch (error) {
+                messageDiv.textContent = `创建出错: ${error.message}`;
+                messageDiv.className = 'message error';
+                console.error('创建错误:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
