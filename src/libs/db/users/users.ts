@@ -13,22 +13,7 @@ export interface User {
     status: number;
 }
 
-
-export const queryAllUsers = async (params: { id?: number, username?: string, email?: string }) => {
-    try {
-        if (!params.id && !params.username && !params.email) {
-            const [rows] = await pool.execute("SELECT * FROM users");
-            return rows;
-        } else {
-            console.log(params.id, params.username, params.email);
-            const [rows] = await pool.execute("SELECT * FROM users WHERE id = ? OR username = ? OR email = ?", [params.id, params.username, params.email]);
-            return rows;
-        }
-    } catch (error) {
-        throw error;
-    } 
-}
-
+//根据id查询用户
 export const queryUserById = async (id: number) => {
     try {
         const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [id]);
@@ -38,7 +23,17 @@ export const queryUserById = async (id: number) => {
     }
 }
 
+//根据用户名或邮箱查询用户
+export const queryUserForLogin = async (params: { username?: string, email?: string }): Promise<User[] | null> => {
+    try {
+        const [rows] = await pool.execute("SELECT * FROM users WHERE username = ? OR email = ?", [params.username, params.email]);
+        return rows as User[] | null;
+    } catch (error) {
+        throw error;
+    }
+}
 
+//创建用户
 export const createtUser = async (params:User) => {
     try { 
         // 转换ISO时间格式为MySQL兼容的datetime格式
@@ -55,6 +50,7 @@ export const createtUser = async (params:User) => {
     }
 }
 
+//更新用户信息
 export const updateUser = async (params:User) => {
     try { 
         // 转换ISO时间格式为MySQL兼容的datetime格式

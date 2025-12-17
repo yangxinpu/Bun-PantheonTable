@@ -34,6 +34,6 @@ app.listen({
     hostname: hostname,
     port: port,
 },()=>{
-    console.log(`🚀🚀🚀 PantheonTable 服务器运行在 http://${hostname}:${port}`);
-    console.log(`📊当前主机Ipv4: ${hostname}`);
+    console.log(`🚀🚀🚀 \x1b[35mPantheonTable\x1b[0m 服务器运行在 \x1b[36mhttp://${hostname}:${port}\x1b[0m`);
+    console.log(`📊  当前主机Ipv4: \x1b[32m${hostname}\x1b[0m`);
 });

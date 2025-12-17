@@ -1,4 +1,4 @@
-import { queryAllUsers, queryUserById, createtUser, updateUser } from "../../libs/db/users/users";
+import { queryUserById, updateUser } from "../../libs/db/users/users";
 import type { User } from "../../libs/db/users/users";
 
 
@@ -13,7 +13,7 @@ export default (group: any) => {
                 ok: false
             };
         }
-        
+
         const token = authHeader.replace("Bearer ", "");
         try {
             const decoded = await jwt.verify(token);
@@ -36,29 +36,6 @@ export default (group: any) => {
         }
     };
 
-    group.get("/query", verifyJWT, async ({ url, user }: { url: string, user: any }) => {
-        const searchParams = new URL(url).searchParams;
-        try {
-            const result = await queryAllUsers({
-                id: Number(searchParams.get("id")) || 0,
-                username: searchParams.get("username") || "",
-                email: searchParams.get("email") || "",
-            });
-            return {
-                code: 200,
-                message: "查询成功",
-                ok: true,
-                data: result,
-            };
-        } catch (error) {
-            return {
-                code: 500,
-                message: "查询失败",
-                ok: false,
-                data: error,
-            };
-        }
-    });
     group.get("/queryById", verifyJWT, async ({ url, user }: { url: string, user: any }) => {
         const searchParams = new URL(url).searchParams;
         try {
@@ -75,22 +52,6 @@ export default (group: any) => {
                 message: "查询失败",
                 ok: false,
                 data: error,
-            };
-        }
-    });
-    group.post("/create", verifyJWT, async ({body, user}: {body: User, user: any}) => {
-        try {
-            await createtUser(body);
-            return {
-                code: 200,
-                message: "创建成功",
-                ok: true,
-            };
-        } catch (error) {
-            return {
-                code: 500,
-                message: "创建失败",
-                ok: false
             };
         }
     });
