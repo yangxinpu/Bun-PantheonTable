@@ -1,59 +1,94 @@
 import { createtUser, queryUserForLogin } from "../../libs/db/users/users";
-
+import { mkdirSync } from "fs";
+import { join } from "path";
+import crypto from "crypto";
 
 export default (group: any) => {
-    group.post("/", async ({body, set,jwt}: {body: any, set: any, jwt: any}) => {
+    group.post("/", async ({ body, set, jwt }: any) => {
         try {
-            // 验证用户名或邮箱是否为空
-            if (!body.username && !body.email) {
-                return {
-                    code: 400,
-                    message: "用户名或邮箱不能为空",
-                    ok: false,
-                };
+            let username = "";
+            let email = "";
+            let avatarUrl = "";
+            // 处理请求数据
+            if (body) {
+                username = (body.username as string) ?? "";
+                email = (body.email as string) ?? "";
+
+                const avatar = body.avatar as File | null;
+                
+                if (avatar && avatar.size > 0) {
+                if (!avatar.type.startsWith("image/")) {
+                    return { code: 400, message: "头像必须是图片", ok: false };
+                }
+
+                const uploadDir = join(process.cwd(), "uploads/avatars");
+                mkdirSync(uploadDir, { recursive: true });
+
+                const ext = avatar.name.split(".").pop();
+                const filename = `${crypto.randomUUID()}.${ext}`;
+                const filepath = join(uploadDir, filename);
+
+                const buffer = Buffer.from(await avatar.arrayBuffer());
+                await Bun.write(filepath, buffer);
+                avatarUrl = `/avatars/${filename}`;
+                } else if (typeof body.avatar === "string") {
+                    // 处理JSON请求中的头像URL
+                    avatarUrl = body.avatar;
+                }
             }
-            const result = await queryUserForLogin(body);
-            //如果用户不存在，需要注册
-            if (!result || result.length === 0) {
-                const newUser = {
-                    ...body,
-                    avatar: body.avatar || "",
+            if (!username && !email) {
+                return { code: 400, message: "用户名或邮箱不能为空", ok: false };
+            }
+            
+            // 查看是否存在用户，不存在则注册
+            const users = await queryUserForLogin({ username, email });
+
+            // 注册
+            if (!users || users.length === 0) {
+                await createtUser({
+                    username,
+                    email,
+                    avatar: avatarUrl,
                     total_games: 0,
                     win_rate: 0,
                     last_login_time: new Date().toISOString(),
-                    last_login_ip: set?.ip || "127.0.0.1",
-                    status: 0
-                };
-                
-                await createtUser(newUser);
-                // 生成JWT token
-                const token = jwt.sign({ id: newUser.id });
+                    last_login_ip: set.ip ?? "127.0.0.1",
+                    status: 0,
+                });
 
+                const user = await queryUserForLogin({ username, email });
+                const token = jwt.sign({ id: user![0]!.id });
                 return {
                     code: 200,
-                    message: "用户注册成功",
-                    tokent: token,
+                    message: "注册成功",
                     ok: true,
+                    token,
+                    data: {
+                        id: user![0]!.id,
+                        avatarUrl: user![0]!.avatar
+                    }
                 };
             }
-
-            //查询用户成功，代表登录成功
-            const token = jwt.sign({ id: result[0]!.id });
+            // 登录
+            const token = await jwt.sign({ id: users![0]!.id });
             return {
                 code: 200,
                 message: "登录成功",
-                ok: true,
-                tokent: token,
-                data: result[0]!.id,
+                ok: true, token,
+                data: {
+                    id: users![0]!.id,
+                    avatarUrl: users![0]!.avatar
+                }
             };
-        } catch (error) {
-            console.error("登录或注册失败:", error);
+        } catch (err) {
+            console.error("登录/注册失败:", err);
             return {
                 code: 500,
-                message: "登录或注册失败",
-                ok: false,
+                message: "服务器错误",
+                ok: false
             };
         }
     });
+
     return group;
-}
+};

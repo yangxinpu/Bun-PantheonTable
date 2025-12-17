@@ -2,7 +2,7 @@ import pool from "../index";
 
 //用户类型
 export interface User {
-    id: number;
+    id?: number; // 可选，数据库自动生成
     username: string;
     email: string;
     avatar: string;

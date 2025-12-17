@@ -24,7 +24,7 @@ app.use(jwt({
     exp: "7d",
 }));
 
-app.use(logger);
+//app.use(logger);
 
 app.use(router);
 
