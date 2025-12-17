@@ -14,7 +14,7 @@ export interface User {
 }
 
 
-export const queryUsers = async (params: { id?: number, username?: string, email?: string }) => {
+export const queryAllUsers = async (params: { id?: number, username?: string, email?: string }) => {
     try {
         if (!params.id && !params.username && !params.email) {
             const [rows] = await pool.execute("SELECT * FROM users");
@@ -28,6 +28,16 @@ export const queryUsers = async (params: { id?: number, username?: string, email
         throw error;
     } 
 }
+
+export const queryUserById = async (id: number) => {
+    try {
+        const [rows] = await pool.execute("SELECT * FROM users WHERE id = ?", [id]);
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 export const createtUser = async (params:User) => {
     try { 

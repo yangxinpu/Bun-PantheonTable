@@ -1,13 +1,45 @@
-import { queryUsers, createtUser, updateUser } from "../../libs/db/users/users";
+import { queryAllUsers, queryUserById, createtUser, updateUser } from "../../libs/db/users/users";
 import type { User } from "../../libs/db/users/users";
 
 
 export default (group: any) => {
-    group.get("/query", async ({ url }: { url: string }) => {
-        throw new Error("查询参数错误");
+    const verifyJWT = async ({ request, jwt, set }: any) => {
+        const authHeader = request.headers.get("Authorization");
+        if (!authHeader) {
+            set.status = 401;
+            return {
+                code: 401,
+                message: "未提供授权令牌",
+                ok: false
+            };
+        }
+        
+        const token = authHeader.replace("Bearer ", "");
+        try {
+            const decoded = await jwt.verify(token);
+            if (!decoded) {
+                set.status = 401;
+                return {
+                    code: 401,
+                    message: "无效的授权令牌",
+                    ok: false
+                };
+            }
+            return { user: decoded };
+        } catch (error) {
+            set.status = 401;
+            return {
+                code: 401,
+                message: "授权令牌验证失败",
+                ok: false
+            };
+        }
+    };
+
+    group.get("/query", verifyJWT, async ({ url, user }: { url: string, user: any }) => {
         const searchParams = new URL(url).searchParams;
         try {
-            const result = await queryUsers({
+            const result = await queryAllUsers({
                 id: Number(searchParams.get("id")) || 0,
                 username: searchParams.get("username") || "",
                 email: searchParams.get("email") || "",
@@ -27,7 +59,26 @@ export default (group: any) => {
             };
         }
     });
-    group.post("/create", async ({body}: {body: User}) => {
+    group.get("/queryById", verifyJWT, async ({ url, user }: { url: string, user: any }) => {
+        const searchParams = new URL(url).searchParams;
+        try {
+            const result = await queryUserById(Number(searchParams.get("id")) || 0);
+            return {
+                code: 200,
+                message: "查询成功",
+                ok: true,
+                data: result,
+            };
+        } catch (error) {
+            return {
+                code: 500,
+                message: "查询失败",
+                ok: false,
+                data: error,
+            };
+        }
+    });
+    group.post("/create", verifyJWT, async ({body, user}: {body: User, user: any}) => {
         try {
             await createtUser(body);
             return {
@@ -43,7 +94,7 @@ export default (group: any) => {
             };
         }
     });
-    group.post("/update", async ({body}: {body: User}) => {
+    group.post("/update", verifyJWT, async ({body, user}: {body: User, user: any}) => {
         try {
             await updateUser(body);
             return {
